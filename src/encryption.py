@@ -46,7 +46,12 @@ def load_context(serialized_context):
 
 def generate_projection_matrix(seed_hash):
     np.random.seed(int.from_bytes(seed_hash[:4], 'big'))
-    return np.random.randn(EMBEDDING_SIZE, EMBEDDING_SIZE)
+    proj_matrix = np.random.randn(EMBEDDING_SIZE, EMBEDDING_SIZE)
+    
+    norm_factor = np.linalg.norm(proj_matrix)
+    proj_matrix /= norm_factor  
+
+    return proj_matrix
 
 def apply_user_specific_projection(embedding, user_seed):
     user_seed_hash = hash_seed(user_seed)
@@ -68,7 +73,7 @@ def create_encrypted_bundle(embedding, user_seed, threshold):
     bundled_data = pickle.dumps({
         "encrypted_embedding": encrypted_embedding,
         "encrypted_context": encrypted_serialized_context,
-        "threshold": threshold  # Added threshold here clearly
+        "threshold": threshold  
     })
 
     return bundled_data
