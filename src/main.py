@@ -64,7 +64,8 @@ if choice == "1":
         proj = apply_user_specific_projection(other, user_pin)
         dists.append(np.linalg.norm(proj_primary - proj))
 
-    threshold = np.mean(dists) + 2 * np.std(dists)
+    base_threshold = 0.25  
+    threshold = max(base_threshold, np.percentile(dists, 95) * 1.1)
     print(f"🚩 Chosen Threshold: {threshold:.4f}")
 
     bundle = create_encrypted_bundle(primary, user_pin, threshold)
