@@ -4,7 +4,9 @@ import os
 import sys  # Added for better error handling
 from dotenv import load_dotenv
 try:
-    with open("./main code/build/contracts/BiometricStorage.json", "r") as contract_file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    contract_path = os.path.join(script_dir, "../build/contracts/BiometricStorage.json")
+    with open(contract_path, "r") as contract_file:
         contract_build = json.load(contract_file)
 except FileNotFoundError:
     sys.exit("Error: BiometricStorage.json file not found. Ensure the file exists at the specified path.")
@@ -20,8 +22,8 @@ abi = contract_build['abi']
 contract_address = contract_build['networks']['11155111']['address']
 contract = web3.eth.contract(address=contract_address, abi=abi)
 
-def store_ipfs_hash(email, ipfs_hash, account, private_key):
-    tx = contract.functions.storeIPFSHash(email, ipfs_hash).build_transaction({
+def store_ipfs_hash(uid, ipfs_hash, account, private_key):
+    tx = contract.functions.storeIPFSHash(uid, ipfs_hash).build_transaction({
         'from': account,
         'nonce': web3.eth.get_transaction_count(account),
         'gas': 2000000,
@@ -30,8 +32,8 @@ def store_ipfs_hash(email, ipfs_hash, account, private_key):
     signed_tx = web3.eth.account.sign_transaction(tx, private_key)
     web3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
-def update_ipfs_hash(email, new_ipfs_hash, account, private_key):
-    tx = contract.functions.updateIPFSHash(email, new_ipfs_hash).build_transaction({
+def update_ipfs_hash(uid, new_ipfs_hash, account, private_key):
+    tx = contract.functions.updateIPFSHash(uid, new_ipfs_hash).build_transaction({
         'from': account,
         'nonce': web3.eth.get_transaction_count(account),
         'gas': 2000000,
@@ -40,8 +42,8 @@ def update_ipfs_hash(email, new_ipfs_hash, account, private_key):
     signed_tx = web3.eth.account.sign_transaction(tx, private_key)
     web3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
-def revoke_ipfs_hash(email, account, private_key):
-    tx = contract.functions.revokeIPFSHash(email).build_transaction({
+def revoke_ipfs_hash(uid, account, private_key):
+    tx = contract.functions.revokeIPFSHash(uid).build_transaction({
         'from': account,
         'nonce': web3.eth.get_transaction_count(account),
         'gas': 2000000,
@@ -50,5 +52,5 @@ def revoke_ipfs_hash(email, account, private_key):
     signed_tx = web3.eth.account.sign_transaction(tx, private_key)
     web3.eth.send_raw_transaction(signed_tx.raw_transaction)
 
-def get_ipfs_hash(email):
-    return contract.functions.getIPFSHash(email).call()
+def get_ipfs_hash(uid):
+    return contract.functions.getIPFSHash(uid).call()
